@@ -8,6 +8,8 @@
 **/.idea/*
 **/build/*
 
+**/python/.eggs/*
+
 # vscode generated files
 .vscode
 docker-compose-devcontainer.yml
