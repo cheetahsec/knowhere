@@ -242,4 +242,5 @@ AlgorithmInterface<dist_t>::searchKnnCloserFirst(void* query_data, size_t k,
 #include "space_cosine.h"
 #include "space_hamming.h"
 #include "space_jaccard.h"
+#include "space_tlsh.h"
 #pragma GCC diagnostic pop

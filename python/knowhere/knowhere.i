@@ -56,6 +56,7 @@ import_array();
 %include <knowhere/bitsetview.h>
 %include <knowhere/expected.h>
 
+%apply (uint8_t* IN_ARRAY2, int DIM1, int DIM2) {(uint8_t* xb, int nb, int dim)}
 %apply (float* IN_ARRAY2, int DIM1, int DIM2) {(float* xb, int nb, int dim)}
 %apply (int* IN_ARRAY2, int DIM1, int DIM2) {(int* xb, int nb, int dim)}
 %apply (uint8_t *IN_ARRAY1, int DIM1) {(uint8_t *block, int size)}
@@ -242,6 +243,16 @@ class BitSet {
 knowhere::BitsetView
 GetNullBitSetView() {
     return nullptr;
+};
+
+knowhere::DataSetPtr
+Array2DataSetS(uint8_t* xb, int nb, int dim) {
+    auto ds = std::make_shared<DataSet>();
+    ds->SetIsOwner(false);
+    ds->SetRows(nb);
+    ds->SetDim(dim);
+    ds->SetTensor(xb);
+    return ds;
 };
 
 knowhere::DataSetPtr

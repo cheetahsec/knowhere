@@ -52,6 +52,8 @@ class HnswIndexNode : public IndexNode {
             space = new (std::nothrow) hnswlib::HammingSpace(dim);
         } else if (IsMetricType(hnsw_cfg.metric_type.value(), metric::JACCARD)) {
             space = new (std::nothrow) hnswlib::JaccardSpace(dim);
+        } else if (IsMetricType(hnsw_cfg.metric_type.value(), metric::TLSH)) {
+            space = new (std::nothrow) hnswlib::TLSHSpace(dim);
         } else {
             LOG_KNOWHERE_WARNING_ << "metric type not support in hnsw: " << hnsw_cfg.metric_type.value();
             return Status::invalid_metric_type;

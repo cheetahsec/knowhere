@@ -92,6 +92,7 @@ constexpr const char* HAMMING = "HAMMING";
 constexpr const char* JACCARD = "JACCARD";
 constexpr const char* SUBSTRUCTURE = "SUBSTRUCTURE";
 constexpr const char* SUPERSTRUCTURE = "SUPERSTRUCTURE";
+constexpr const char* TLSH = "TLSH";
 }  // namespace metric
 
 }  // namespace knowhere

@@ -49,6 +49,7 @@ enum Metric {
     COSINE = 2,
     HAMMING = 10,
     JACCARD = 11,
+    TLSH = 99,
     UNKNOWN = 100,
 };
 
@@ -80,6 +81,8 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
             metric_type_ = Metric::HAMMING;
         } else if (auto x = dynamic_cast<JaccardSpace*>(s)) {
             metric_type_ = Metric::JACCARD;
+        } else if (auto x = dynamic_cast<TLSHSpace*>(s)) {
+            metric_type_ = Metric::TLSH;
         } else {
             metric_type_ = Metric::UNKNOWN;
         }
@@ -672,6 +675,8 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
             space_ = new hnswlib::HammingSpace(dim);
         } else if (metric_type_ == Metric::JACCARD) {
             space_ = new hnswlib::JaccardSpace(dim);
+        } else if (metric_type_ == Metric::TLSH) {
+            space_ = new hnswlib::TLSHSpace(dim);
         } else {
             throw std::runtime_error("Invalid metric type " + std::to_string(metric_type_));
         }
@@ -809,6 +814,8 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
             space_ = new hnswlib::HammingSpace(dim);
         } else if (metric_type_ == Metric::JACCARD) {
             space_ = new hnswlib::JaccardSpace(dim);
+        } else if (metric_type_ == Metric::TLSH) {
+            space_ = new hnswlib::TLSHSpace(dim);
         } else {
             throw std::runtime_error("Invalid metric type " + std::to_string(metric_type_));
         }
