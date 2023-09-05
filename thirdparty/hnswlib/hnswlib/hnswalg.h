@@ -1075,6 +1075,10 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
         tableint currObj = enterpoint_node_;
         tableint enterpoint_copy = enterpoint_node_;
 
+        if (metric_type_ == Metric::TLSH) {
+            tlsh::transform_lsh_bin(data_point, data_size_);
+        }
+
         memset(data_level0_memory_ + cur_c * size_data_per_element_ + offsetLevel0_, 0, size_data_per_element_);
         memcpy(getDataByInternalId(cur_c), data_point, data_size_);
 
@@ -1167,6 +1171,10 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
             return {};
 
         size_t dim = *(size_t*)dist_func_param_;
+
+        if (metric_type_ == Metric::TLSH) {
+            tlsh::transform_lsh_bin(query_data, dim);
+        }
 
         // do normalize for COSINE metric type
         std::unique_ptr<float[]> query_data_norm;
@@ -1277,6 +1285,10 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
         }
 
         size_t dim = *((size_t*)dist_func_param_);
+
+        if (metric_type_ == Metric::TLSH) {
+            tlsh::transform_lsh_bin(query_data, dim);
+        }
 
         // do normalize for COSINE metric type
         std::unique_ptr<float[]> query_data_norm;

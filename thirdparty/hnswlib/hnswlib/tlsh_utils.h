@@ -7,8 +7,8 @@ namespace tlsh {
     #define INTERNAL_TLSH_STRING_LEN 70
     #define TLSH_CHECKSUM_LEN 1
     #define CODE_SIZE 32
-    #define length_mult 12
-    #define qratio_mult 12
+    #define LENGTH_MULT 12
+    #define QRATIO_MULT 12
 
     typedef struct
     {
@@ -24,7 +24,7 @@ namespace tlsh {
             } QR;
         } Q;
         unsigned char tmp_code[CODE_SIZE];
-    } LshBinStruct;
+    } lsh_bin_struct;
 
     // Compile and run gen_arr2.cpp to generate bit_pairs_diff_table
     static unsigned char bit_pairs_diff_table[][256] = {
@@ -4123,60 +4123,34 @@ namespace tlsh {
         18, 14, 13, 12, 14, 10, 9, 8, 13, 9, 8, 7, 12, 8, 7, 6,
         14, 10, 9, 8, 10, 6, 5, 4, 9, 5, 4, 3, 8, 4, 3, 2,
         13, 9, 8, 7, 9, 5, 4, 3, 8, 4, 3, 2, 7, 3, 2, 1,
-        12, 8, 7, 6, 8, 4, 3, 2, 7, 3, 2, 1, 6, 2, 1, 0}};
-
+        12, 8, 7, 6, 8, 4, 3, 2, 7, 3, 2, 1, 6, 2, 1, 0}
+    };
     
-    static int mod_diff(unsigned int x, unsigned int y, unsigned int R)
+    static inline int mod_diff(unsigned int x, unsigned int y, unsigned int R)
     {
         int dl = 0;
         int dr = 0;
-        if (y > x)
-        {
+        if (y > x) {
             dl = (int)(y - x);
             dr = (int)(x + R - y);
-        }
-        else
-        {
+        } else {
             dl = (int)(x - y);
             dr = (int)(y + R - x);
         }
         return (dl > dr ? dr : dl);
     }
 
-    static int h_distance(int len, const unsigned char x[], const unsigned char y[])
+    static inline int h_distance(int len, const unsigned char x[], const unsigned char y[])
     {
         int diff = 0;
 
-        for (int i = 0; i < len; i++)
-        {
+        for (int i = 0; i < len; i++) {
             diff += bit_pairs_diff_table[x[i]][y[i]];
         }
         return diff;
     }
 
-    static void from_hex(const char *psrc, int len, unsigned char *pdest)
-    {
-        static unsigned char DecLookup[] = {
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // gap before first hex digit
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,          // 0123456789
-            0, 0, 0, 0, 0, 0, 0,                   // :;<=>?@ (gap)
-            10, 11, 12, 13, 14, 15,                // ABCDEF
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // GHIJKLMNOPQRS (gap)
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // TUVWXYZ[/]^_` (gap)
-            10, 11, 12, 13, 14, 15                 // abcdef
-        };
-
-        for (int i = 0; i < len; i += 2)
-        {
-            unsigned d = DecLookup[*(unsigned char *)(psrc + i)] << 4;
-            d |= DecLookup[*(unsigned char *)(psrc + i + 1)];
-            *pdest++ = d;
-        }
-    }
-
-    static unsigned char swap_byte(const unsigned char in)
+    static inline unsigned char swap_byte(const unsigned char in)
     {
         unsigned char byte = 0;
         byte = ((in & 0xF0) >> 4) & 0x0F;
@@ -4184,7 +4158,7 @@ namespace tlsh {
         return byte;
     }
 
-    static void reverse_bytes(unsigned char *bytes, int size)
+    static inline void reverse_bytes(unsigned char *bytes, int size)
     {
         int start = 0;
         int end = size - 1;
@@ -4197,61 +4171,52 @@ namespace tlsh {
         }
     }
 
-    static int tlsh_impl_from_tlsh_str(LshBinStruct *lsh_bin, const char *str)
+    static void transform_lsh_bin(const void* lsh_bytes, int size)
     {
-        from_hex(&str[0], INTERNAL_TLSH_STRING_LEN, (unsigned char *)lsh_bin);
-
-        // Reconstruct checksum, Qrations & lvalue
-        for (int k = 0; k < TLSH_CHECKSUM_LEN; k++)
-        {
-            lsh_bin->checksum[k] = swap_byte(lsh_bin->checksum[k]);
+        if ((lsh_bytes != nullptr) || (size != sizeof(lsh_bin_struct))) {
+            return;
         }
-        lsh_bin->lvalue = swap_byte(lsh_bin->lvalue);
-        lsh_bin->Q.qb = swap_byte(lsh_bin->Q.qb);
-        reverse_bytes(lsh_bin->tmp_code, CODE_SIZE);
-
-        return 0;
+        lsh_bin_struct* tmp = (lsh_bin_struct*)lsh_bytes;
+        for (int k = 0; k < TLSH_CHECKSUM_LEN; k++) {
+            tmp->checksum[k] = swap_byte(tmp->checksum[k]);
+        }
+        tmp->lvalue = swap_byte(tmp->lvalue);
+        tmp->Q.qb = swap_byte(tmp->Q.qb);
+        reverse_bytes(tmp->tmp_code, CODE_SIZE);
     }
 
-    static int tlsh_diff(const char *hash_l, const char *hash_r)
+    static int diff(const lsh_bin_struct *lsh_bin_l, const lsh_bin_struct *lsh_bin_r)
     {
         int diff = 0;
 
-        LshBinStruct lsh_bin_l;
-        tlsh_impl_from_tlsh_str(&lsh_bin_l, hash_l);
-        LshBinStruct lsh_bin_r;
-        tlsh_impl_from_tlsh_str(&lsh_bin_r, hash_r);
-
-        int ldiff = mod_diff(lsh_bin_l.lvalue, lsh_bin_r.lvalue, RANGE_LVALUE);
+        int ldiff = mod_diff(lsh_bin_l->lvalue, lsh_bin_r->lvalue, RANGE_LVALUE);
         if (ldiff == 0)
             diff = 0;
         else if (ldiff == 1)
             diff = 1;
         else
-            diff += ldiff * length_mult;
+            diff += ldiff * LENGTH_MULT;
 
-        int q1diff = mod_diff(lsh_bin_l.Q.QR.q1ratio, lsh_bin_r.Q.QR.q1ratio, RANGE_QRATIO);
+        int q1diff = mod_diff(lsh_bin_l->Q.QR.q1ratio, lsh_bin_r->Q.QR.q1ratio, RANGE_QRATIO);
         if (q1diff <= 1)
             diff += q1diff;
         else
-            diff += (q1diff - 1) * qratio_mult;
+            diff += (q1diff - 1) * QRATIO_MULT;
 
-        int q2diff = mod_diff(lsh_bin_l.Q.QR.q2ratio, lsh_bin_r.Q.QR.q2ratio, RANGE_QRATIO);
+        int q2diff = mod_diff(lsh_bin_l->Q.QR.q2ratio, lsh_bin_r->Q.QR.q2ratio, RANGE_QRATIO);
         if (q2diff <= 1)
             diff += q2diff;
         else
-            diff += (q2diff - 1) * qratio_mult;
+            diff += (q2diff - 1) * QRATIO_MULT;
 
-        for (int k = 0; k < TLSH_CHECKSUM_LEN; k++)
-        {
-            if (lsh_bin_l.checksum[k] != lsh_bin_r.checksum[k])
-            {
+        for (int k = 0; k < TLSH_CHECKSUM_LEN; k++) {
+            if (lsh_bin_l->checksum[k] != lsh_bin_r->checksum[k]) {
                 diff++;
                 break;
             }
         }
 
-        diff += h_distance(CODE_SIZE, lsh_bin_l.tmp_code, lsh_bin_r.tmp_code);
+        diff += h_distance(CODE_SIZE, lsh_bin_l->tmp_code, lsh_bin_r->tmp_code);
 
         return (diff);
     }
