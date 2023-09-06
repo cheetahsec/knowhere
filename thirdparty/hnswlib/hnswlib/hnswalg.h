@@ -1173,7 +1173,7 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
         size_t dim = *(size_t*)dist_func_param_;
 
         if (metric_type_ == Metric::TLSH) {
-            tlsh::transform_lsh_bin(query_data, dim);
+            tlsh::transform_lsh_bin(query_data, data_size_);
         }
 
         // do normalize for COSINE metric type
@@ -1287,7 +1287,7 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
         size_t dim = *((size_t*)dist_func_param_);
 
         if (metric_type_ == Metric::TLSH) {
-            tlsh::transform_lsh_bin(query_data, dim);
+            tlsh::transform_lsh_bin(query_data, data_size_);
         }
 
         // do normalize for COSINE metric type

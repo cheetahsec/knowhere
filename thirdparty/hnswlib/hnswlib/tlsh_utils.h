@@ -4173,7 +4173,7 @@ namespace tlsh {
 
     static void transform_lsh_bin(const void* lsh_bytes, int size)
     {
-        if ((lsh_bytes != nullptr) || (size != sizeof(lsh_bin_struct))) {
+        if ((lsh_bytes == nullptr) || (size < sizeof(lsh_bin_struct))) {
             return;
         }
         lsh_bin_struct* tmp = (lsh_bin_struct*)lsh_bytes;
