@@ -902,6 +902,11 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
 
     void
     updatePoint(const void* dataPoint, tableint internalId, float updateNeighborProbability) {
+
+        if (metric_type_ == Metric::TLSH) {
+            tlsh::transform_lsh_bin(dataPoint, data_size_);
+        }
+        
         // update the feature vector associated with existing point with new vector
         memcpy(getDataByInternalId(internalId), dataPoint, data_size_);
 
@@ -1195,7 +1200,7 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
 
         tableint currObj = enterpoint_node_;
         uint64_t vec_hash;
-        if (metric_type_ == Metric::HAMMING || metric_type_ == Metric::JACCARD) {
+        if (metric_type_ == Metric::HAMMING || metric_type_ == Metric::JACCARD || metric_type_ == Metric::TLSH) {
             vec_hash = knowhere::hash_binary_vec((const uint8_t*)query_data, dim);
         } else {
             vec_hash = knowhere::hash_vec((const float*)query_data, dim);
@@ -1309,7 +1314,7 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
 
         tableint currObj = enterpoint_node_;
         uint64_t vec_hash;
-        if (metric_type_ == Metric::HAMMING || metric_type_ == Metric::JACCARD) {
+        if (metric_type_ == Metric::HAMMING || metric_type_ == Metric::JACCARD || metric_type_ == Metric::TLSH) {
             vec_hash = knowhere::hash_binary_vec((const uint8_t*)query_data, dim);
         } else {
             vec_hash = knowhere::hash_vec((const float*)query_data, dim);
