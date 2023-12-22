@@ -19,6 +19,7 @@
 #include <faiss/utils/hamming.h>
 #include <faiss/utils/jaccard-inl.h>
 #include <faiss/utils/structure-inl.h>
+#include <faiss/utils/tlsh-inl.h>
 #include <faiss/utils/utils.h>
 #include <simd/hook.h>
 
@@ -522,6 +523,11 @@ void binary_knn_hc(
             break;
         }
 
+        case METRIC_TLSH: {
+            binary_knn_hc<C, faiss::TLSHComputerDefault>(
+                    ncodes, ha, a, b, nb, bitset);
+            break;
+        }
         default:
             break;
     }
@@ -639,6 +645,15 @@ void binary_range_search(
                         break;
                 }
             }
+            break;
+        }
+        
+        case METRIC_TLSH: {
+            binary_range_search<
+                    C,
+                    T,
+                    faiss::TLSHComputerDefault>(
+                    a, b, na, nb, radius, code_size, res, bitset);
             break;
         }
         case METRIC_Superstructure:

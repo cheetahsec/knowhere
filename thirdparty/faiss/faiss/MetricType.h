@@ -30,6 +30,8 @@ enum MetricType {
     METRIC_Substructure = 8,   ///< Tversky case alpha = 0, beta = 1
     METRIC_Superstructure = 9, ///< Tversky case alpha = 1, beta = 0
 
+    METRIC_TLSH = 99,
+
     /// some additional metrics defined in scipy.spatial.distance
     METRIC_Canberra = 20,
     METRIC_BrayCurtis = 21,

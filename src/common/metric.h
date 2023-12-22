@@ -31,6 +31,7 @@ Str2FaissMetricType(std::string metric) {
         {metric::COSINE, faiss::MetricType::METRIC_INNER_PRODUCT},
         {metric::HAMMING, faiss::MetricType::METRIC_Hamming},
         {metric::JACCARD, faiss::MetricType::METRIC_Jaccard},
+        {metric::TLSH, faiss::MetricType::METRIC_Substructure},
         {metric::SUBSTRUCTURE, faiss::MetricType::METRIC_Substructure},
         {metric::SUPERSTRUCTURE, faiss::MetricType::METRIC_Superstructure},
     };

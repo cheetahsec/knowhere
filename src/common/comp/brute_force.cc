@@ -102,6 +102,12 @@ BruteForce::Search(const DataSetPtr base_dataset, const DataSetPtr query_dataset
                     }
                     break;
                 }
+                case faiss::METRIC_TLSH: {
+                    auto cur_query = (const uint8_t*)xq + (dim / 8) * index;
+                    faiss::float_maxheap_array_t res = {size_t(1), size_t(topk), cur_labels, cur_distances};
+                    binary_knn_hc(faiss::METRIC_TLSH, &res, cur_query, (const uint8_t*)xb, nb, dim / 8, bitset);
+                    break;
+                }
                 case faiss::METRIC_Substructure:
                 case faiss::METRIC_Superstructure: {
                     // only matched ids will be chosen, not to use heap
@@ -194,6 +200,12 @@ BruteForce::SearchWithBuf(const DataSetPtr base_dataset, const DataSetPtr query_
                     for (int i = 0; i < topk; ++i) {
                         cur_distances[i] = int_distances[i];
                     }
+                    break;
+                }
+                case faiss::METRIC_TLSH: {
+                    auto cur_query = (const uint8_t*)xq + (dim / 8) * index;
+                    faiss::float_maxheap_array_t res = {size_t(1), size_t(topk), cur_labels, cur_distances};
+                    binary_knn_hc(faiss::METRIC_TLSH, &res, cur_query, (const uint8_t*)xb, nb, dim / 8, bitset);
                     break;
                 }
                 case faiss::METRIC_Substructure:
@@ -293,6 +305,12 @@ BruteForce::RangeSearch(const DataSetPtr base_dataset, const DataSetPtr query_da
                     faiss::binary_range_search<faiss::CMin<int, int64_t>, int>(faiss::METRIC_Hamming, cur_query,
                                                                                (const uint8_t*)xb, 1, nb, (int)radius,
                                                                                dim / 8, &res, bitset);
+                    break;
+                }
+                case faiss::METRIC_TLSH: {
+                    auto cur_query = (const uint8_t*)xq + (dim / 8) * index;
+                    faiss::binary_range_search<faiss::CMin<float, int64_t>, float>(
+                        faiss::METRIC_TLSH, cur_query, (const uint8_t*)xb, 1, nb, radius, dim / 8, &res, bitset);
                     break;
                 }
                 default: {
